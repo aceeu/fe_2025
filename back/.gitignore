@@ -1,0 +1,7 @@
+node_modules/
+*.csv
+.vscode
+.dumps
+certNotes.txt
+*.lnk
+*.bat

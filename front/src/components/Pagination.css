@@ -1,0 +1,108 @@
+.pagination-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e3f2fd;
+}
+
+.pagination-info {
+  color: #546e7a;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.pagination-button {
+  padding: 8px 12px;
+  background: #ffffff;
+  border: 2px solid #e0e7ff;
+  border-radius: 8px;
+  color: #1976d2;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s;
+  min-width: 40px;
+}
+
+.pagination-button:hover:not(:disabled):not(.ellipsis) {
+  background: #e3f2fd;
+  border-color: #1976d2;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(25, 118, 210, 0.2);
+}
+
+.pagination-button:active:not(:disabled):not(.ellipsis) {
+  transform: translateY(0);
+}
+
+.pagination-button.active {
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+  color: #ffffff;
+  font-weight: 700;
+  border-color: #1976d2;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
+}
+
+.pagination-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: #f5f7fa;
+  border-color: #e0e7ff;
+  color: #90a4ae;
+}
+
+.pagination-button.ellipsis {
+  border: none;
+  background: transparent;
+  cursor: default;
+  color: #90a4ae;
+}
+
+.pagination-button.ellipsis:hover {
+  transform: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .pagination-container {
+    padding: 15px;
+  }
+
+  .pagination-info {
+    font-size: 12px;
+  }
+
+  .pagination-button {
+    padding: 6px 10px;
+    font-size: 12px;
+    min-width: 35px;
+  }
+
+  .pagination-controls {
+    gap: 3px;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+  .pagination-button {
+    padding: 6px 8px;
+    font-size: 11px;
+    min-width: 30px;
+  }
+}
