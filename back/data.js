@@ -2,6 +2,7 @@ let MongoClient = require('mongodb').MongoClient;
 let ObjectID = require('mongodb').ObjectID;
 let moment = require('moment');
 let config = require('./config');
+const { ObjectId } = require('mongodb');
 const detectValidUser = require('./helpers').detectValidUser;
 
 
@@ -39,48 +40,49 @@ async function delRow(collection, req, res) {
 
 const requiredParamsForAdd = ['_id', 'creator', 'buyer', 'category', 'buyDate', 'product', 'sum', 'whom', 'note'];
 
-function checkDataForAdd(data) {
+const requiredParamsForEdit = ['_id', 'editor', 'buyer', 'category', 'buyDate', 'product', 'sum', 'whom', 'note'];
+
+
+function checkDataFor(data, requiredParams) {
     const keys = Object.keys(data);
     // if (requiredParams.length != keys.length)
     //     return false;
     let res = [];
     keys.forEach((k, i) => {
-         res[i] = requiredParamsForAdd.findIndex(p => p == k);
+         res[i] = requiredParams.findIndex(p => p == k);
     })
     return res.findIndex(v => v === -1) == -1;
 }
 
 async function editRow(collection, req, res) {
   let row = req.body;
-  if (!checkDataForAdd(row))
+  if (!checkDataFor(row, requiredParamsForEdit))
     throw 'invalid check data';
   row = {...row, buyDate: new Date(row.buyDate)}; // convert to date of buydate value
   const {_id, ...rowni} = row;
   const thisdate = moment().toDate();
   const values = {...rowni, editor: req.session.name, edited: thisdate}
-  const ires = await collection.findOneAndReplace({_id: {$eq: ObjectID(row._id)}}, values);
-  if (ires.ok)
-      res.json({res: true, text: 'item edited'});
+  console.log({_id}, {values})
+  const {acknowledged, insertedId} = await collection.updateOne({_id: new ObjectId(_id)}, {$set:values});
+  if (acknowledged)
+      res.json({res: true, text: 'item edited' + insertedId});
   else
-      throw ires.lastErrorObject;
+      throw 'cannot edit a record';
 }
 
 async function addRow(collection, req, res) {
   let {_id, ...row} = req.body;
-  if (!checkDataForAdd(row))
+  if (!checkDataFor(row, requiredParamsForAdd))
     throw 'invalid check data';
   row = {...row, buyDate: new Date(row.buyDate)}; // convert to date of buydate value
   const thisdate = moment().toDate();
-  row = { created: thisdate, creator: req.session.name, ...row, sum: +row.sum };
-  console.log({row})
+  row = { ...row, created: thisdate, creator: req.session.name,  sum: +row.sum };
   const {acknowledged, insertedId}  = await collection.insertOne(row);
   if (acknowledged) {
       res.json({res: true, text: 'item added:' + insertedId, row},);
   } else
       throw 'cannot insert data to db';
 }
-
-// fomat of filters = {columnName: 'text filter'}
 
 const validFilterColumns = ['buyer', 'category', 'product'];
 function checkFilter(filter) {

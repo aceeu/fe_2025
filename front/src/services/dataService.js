@@ -127,3 +127,53 @@ export const getUniqueBuyers = (data) => {
   });
   return Array.from(buyers).sort();
 };
+
+// Edit an existing record
+export const editData = async (recordData) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/editdata`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify(recordData)
+    });
+
+    const data = await response.json();
+
+    if (data.res) {
+      return { success: true };
+    } else {
+      throw new Error(data.text || 'Failed to update record');
+    }
+  } catch (error) {
+    console.error('Error updating record:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Add a new record
+export const addData = async (recordData) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/adddata`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify(recordData)
+    });
+
+    const data = await response.json();
+
+    if (data.res) {
+      return { success: true };
+    } else {
+      throw new Error(data.text || 'Failed to add record');
+    }
+  } catch (error) {
+    console.error('Error adding record:', error);
+    return { success: false, error: error.message };
+  }
+};

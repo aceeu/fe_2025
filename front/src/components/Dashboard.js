@@ -4,16 +4,18 @@ import DataFilters from './DataFilters';
 import DataGrid from './DataGrid';
 import Pagination from './Pagination';
 import AddRecordModal from './AddRecordModal';
+import EditRecordModal from './EditRecordModal';
 import './Dashboard.css';
 
 const Dashboard = () => {
-  const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [allData, setAllData] = useState([]); // Store all data for buyer list
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingRecord, setEditingRecord] = useState(null);
   const [filters, setFilters] = useState({
     datePeriod: 'last_week',
     buyer: '*',
@@ -40,7 +42,6 @@ const Dashboard = () => {
     const result = await fetchData(filters);
 
     if (result.success) {
-      setData(result.data);
       setFilteredData(result.data);
 
       // Store all data for getting unique buyers
@@ -49,7 +50,6 @@ const Dashboard = () => {
       }
     } else {
       setError(result.error || 'Failed to load data');
-      setData([]);
       setFilteredData([]);
     }
 
@@ -68,6 +68,16 @@ const Dashboard = () => {
 
   const handleRecordAdded = () => {
     // Reload data after adding a new record
+    loadData();
+  };
+
+  const handleRecordDoubleClick = (record) => {
+    setEditingRecord(record);
+    setIsEditModalOpen(true);
+  };
+
+  const handleRecordUpdated = () => {
+    // Reload data after editing a record
     loadData();
   };
 
@@ -112,6 +122,7 @@ const Dashboard = () => {
             data={filteredData}
             currentPage={currentPage}
             itemsPerPage={itemsPerPage}
+            onRecordDoubleClick={handleRecordDoubleClick}
           />
 
           <Pagination
@@ -128,6 +139,16 @@ const Dashboard = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onRecordAdded={handleRecordAdded}
+      />
+
+      <EditRecordModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingRecord(null);
+        }}
+        onRecordUpdated={handleRecordUpdated}
+        record={editingRecord}
       />
     </div>
   );

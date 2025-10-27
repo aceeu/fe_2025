@@ -9,7 +9,6 @@ async function detectValidUser(mongoClient, session) {
     const collection = mongoClient.db(dbName).collection('users');
     const fres = await collection.find({user: {$eq: session.name}});
     const items = await fres.toArray();
-    console.log('user items:' + JSON.stringify(items));
     return items.length == 1;
 }
 // exports

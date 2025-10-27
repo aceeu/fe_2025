@@ -5,6 +5,7 @@
   "main": "fe-server.js",
   "dependencies": {
     "async": "^3.2.6",
+    "bcrypt": "^6.0.0",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
     "csv-parse": "^6.1.0",

@@ -1,7 +1,7 @@
 import React from 'react';
 import './DataGrid.css';
 
-const DataGrid = ({ data, currentPage, itemsPerPage }) => {
+const DataGrid = ({ data, currentPage, itemsPerPage, onRecordDoubleClick }) => {
   if (!data || data.length === 0) {
     return (
       <div className="data-grid-empty">
@@ -55,7 +55,12 @@ const DataGrid = ({ data, currentPage, itemsPerPage }) => {
           </thead>
           <tbody>
             {paginatedData.map((item, index) => (
-              <tr key={item._id || index}>
+              <tr
+                key={item._id || index}
+                onDoubleClick={() => onRecordDoubleClick && onRecordDoubleClick(item)}
+                className="editable-row"
+                title="Дважды щёлкните для редактирования"
+              >
                 <td data-label="Дата">{formatDate(item.buyDate)}</td>
                 <td data-label="Покупатель">{item.buyer || 'Н/Д'}</td>
                 <td data-label="Категория">{item.category || 'Н/Д'}</td>
@@ -79,7 +84,12 @@ const DataGrid = ({ data, currentPage, itemsPerPage }) => {
       {/* Mobile Card View */}
       <div className="mobile-cards">
         {paginatedData.map((item, index) => (
-          <div key={item._id || index} className="data-card">
+          <div
+            key={item._id || index}
+            className="data-card editable-card"
+            onDoubleClick={() => onRecordDoubleClick && onRecordDoubleClick(item)}
+            title="Дважды щёлкните для редактирования"
+          >
             <div className="card-header">
               <span className="card-date">{formatDate(item.buyDate)}</span>
               <span className="card-amount">{formatCurrency(item.sum)}</span>

@@ -49,11 +49,19 @@
 
 .data-table tbody tr {
   border-bottom: 1px solid #e3f2fd;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
+}
+
+.data-table tbody tr.editable-row {
+  cursor: pointer;
 }
 
 .data-table tbody tr:hover {
   background: #f5f9ff;
+}
+
+.data-table tbody tr.editable-row:hover {
+  background: #e3f2fd;
 }
 
 .data-table tbody tr:last-child {
@@ -113,9 +121,18 @@
     transition: all 0.3s;
   }
 
+  .data-card.editable-card {
+    cursor: pointer;
+  }
+
   .data-card:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     transform: translateY(-2px);
+  }
+
+  .data-card.editable-card:hover {
+    border-color: #90caf9;
+    box-shadow: 0 4px 16px rgba(33, 150, 243, 0.15);
   }
 
   .card-header {

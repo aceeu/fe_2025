@@ -41,23 +41,8 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     try {
-      // Step 1: Get authentication token
-      const tokenResponse = await fetch('http://localhost:8088/authtoken', {
-        credentials: 'include'
-      });
-      const tokenData = await tokenResponse.json();
-
-      if (!tokenData.res || !tokenData.token) {
-        throw new Error('Failed to get authentication token');
-      }
-
-      // Step 2: Hash password with token using SHA-256
-      const jsSHA = require('jssha');
-      const shaObj = new jsSHA('SHA-256', 'TEXT');
-      shaObj.update(password + tokenData.token);
-      const hash = shaObj.getHash('HEX');
-
-      // Step 3: Send login request
+      // Send login request with password
+      // Password will be sent over HTTPS and compared with bcrypt hash on server
       const authResponse = await fetch('http://localhost:8088/auth', {
         method: 'POST',
         headers: {
@@ -66,7 +51,7 @@ export const AuthProvider = ({ children }) => {
         credentials: 'include',
         body: JSON.stringify({
           user: username,
-          hash: hash
+          password: password
         })
       });
 

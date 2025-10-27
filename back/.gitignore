@@ -5,3 +5,5 @@ node_modules/
 certNotes.txt
 *.lnk
 *.bat
+.env
+backup-*

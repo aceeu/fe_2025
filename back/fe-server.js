@@ -6,10 +6,9 @@ let express = require('express');
 let session = require('express-session');
 let MongoClient = require('mongodb').MongoClient;
 let config = require('./config');
-let jsSHA = require('jssha');
+const bcrypt = require('bcrypt');
 const bodyParser = require('body-parser');
 const data = require('./data');
-const detectValidUser = require('./helpers').detectValidUser;
 
 const dbName = config.db_name;
 let app = express();
@@ -18,18 +17,19 @@ const corsOptions = {
   optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions)); // Enable CORS for all routes
-let tokenGenerator = require( 'token-generator' )({
-        salt: ';lasdkfj alskdf alskd flk;lksdfalsdk d',
-        timestampMap: 'abcdefghij', // 10 chars array for obfuscation proposes
-    });
 
-function jssha(text) {
-  const shaObj = new jsSHA("SHA-256", "TEXT");
-  shaObj.update(text);
-  return shaObj.getHash("HEX");
+// Use environment variable for session secret, fallback to random string for development
+const sessionSecret = process.env.SESSION_SECRET || require('crypto').randomBytes(32).toString('hex');
+if (!process.env.SESSION_SECRET) {
+  console.warn('WARNING: SESSION_SECRET environment variable not set. Using random secret (sessions will not persist across restarts).');
 }
 
-app.use(session({ secret: 'keyboard cat', cookie: { maxAge: 60 * 60 * 25 * 1000, sameSite: 'strict' }}));
+app.use(session({
+  secret: sessionSecret,
+  cookie: { maxAge: 60 * 60 * 25 * 1000, sameSite: 'strict' },
+  resave: false,
+  saveUninitialized: false
+}));
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -53,41 +53,45 @@ app.use((req, res, next) => {
   next();
 })
 
-app.get('/authtoken', (req, res, next) => {
-  try {
-    if (req.session) {
-      req.session.tokenGenerator = tokenGenerator.generate();
-      res.json({res: true, token: req.session.tokenGenerator});
-    } else {
-      res.json({res: false});
-    }
-  } finally {
-      res.end();
-  }
-});
-
 app.post('/auth', async function(req, res, next) {
+    let client;
     try {
-        const clientHash = req.body.hash;
-        const client = await MongoClient.connect(config.database_url);
+        const { user, password } = req.body;
+
+        if (!user || !password) {
+          throw new Error('Username and password are required');
+        }
+
+        if (!req.session) {
+          throw new Error('Invalid session');
+        }
+
+        client = await MongoClient.connect(config.database_url);
         const users = client.db(dbName).collection('users');
-        const fres = await users.find({user: {$eq: req.body.user}});
-        let items = await fres.toArray();
-        if (items.length != 1)
-          throw 'user not found';
-        if (!req.session)
-          throw 'invalid session';
-        const serverHash = jssha(items[0].password + req.session.tokenGenerator);
-        if (serverHash !== clientHash)
-          throw 'invalid password'
-        req.session.name = items[0].user;
-        res.json({res: true, name: req.session.name});
+        const userDoc = await users.findOne({ user: user });
+
+        if (!userDoc) {
+          throw new Error('Invalid username or password');
+        }
+
+        // Compare the provided password with the hashed password in database
+        const isPasswordValid = await bcrypt.compare(password, userDoc.password);
+
+        if (!isPasswordValid) {
+          throw new Error('Invalid username or password');
+        }
+
+        req.session.name = userDoc.user;
+        res.json({ res: true, name: req.session.name });
     } catch(e) {
-        res.json({res: false, text: e.toString()});
+        console.error('Authentication error:', e.message);
+        res.json({ res: false, text: 'Authentication failed' });
     } finally {
+        if (client) {
+          await client.close();
+        }
         res.end();
     }
-
 });
 
 app.get('/logout', function(req, res, next) {
