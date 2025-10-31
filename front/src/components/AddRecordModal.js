@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { fetchCategories } from '../services/dataService';
 import { useAuth } from '../contexts/AuthContext';
 import './AddRecordModal.css';
+import { API_BASE_URL } from '../config/api';
 
 const AddRecordModal = ({ isOpen, onClose, onRecordAdded }) => {
   const { user } = useAuth();
@@ -83,7 +84,7 @@ const AddRecordModal = ({ isOpen, onClose, onRecordAdded }) => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8088/adddata', {
+      const response = await fetch(`${API_BASE_URL}/adddata`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

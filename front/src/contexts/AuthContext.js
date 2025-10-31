@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { API_BASE_URL } from '../config/api';
 
 const AuthContext = createContext();
 
@@ -21,7 +22,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuthStatus = async () => {
     try {
-      const response = await fetch('http://localhost:8088/user', {
+      const response = await fetch(`${API_BASE_URL}/user`, {
         credentials: 'include' // Important for session cookies
       });
       const data = await response.json();
@@ -43,7 +44,7 @@ export const AuthProvider = ({ children }) => {
     try {
       // Send login request with password
       // Password will be sent over HTTPS and compared with bcrypt hash on server
-      const authResponse = await fetch('http://localhost:8088/auth', {
+      const authResponse = await fetch(`${API_BASE_URL}/auth`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -71,7 +72,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await fetch('http://localhost:8088/logout', {
+      await fetch(`${API_BASE_URL}/logout`, {
         credentials: 'include'
       });
       setUser(null);

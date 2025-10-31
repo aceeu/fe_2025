@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8088';
+import { API_BASE_URL } from '../config/api';
 
 // Date period helpers
 export const getDatePeriod = (period) => {
